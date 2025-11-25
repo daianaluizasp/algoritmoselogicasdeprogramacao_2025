@@ -69,7 +69,7 @@ def cadastrar_peça():
 
 # Lógica de Aprovação e Caixas
     if aprovada:
-        global total_aprovadas # Garante que a atribuição é global (boa prática)
+        global total_aprovadas
         total_aprovadas += 1
         caixa_atual.append(peça)
 
@@ -84,7 +84,7 @@ def cadastrar_peça():
             
 # Lógica de Reprovação
     else:
-        global total_reprovadas # Garante que a atribuição é global (boa prática)
+        global total_reprovadas
         total_reprovadas += 1
 
 def remover_peça():
