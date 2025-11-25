@@ -1,0 +1,183 @@
+# Graduação em Inteligência Artificial e Automações Digitais
+# Disciplina Algoritmos e Lógica de Programação
+# Programa criado para Gestão de Peças, Qualidade e Armazenamento
+
+# Armazenamento das peças
+peças_produzidas = []
+caixa_atual = []
+caixas_fechadas = []
+
+# Controle para o relatório
+total_aprovadas = 0
+total_reprovadas = 0
+reprovadas_por_peso = 0
+reprovadas_por_cor = 0
+reprovadas_por_comprimento = 0
+
+# Critérios de aprovação (considerando peso, comprimento e cores)
+peso_minimo = 95
+peso_maximo = 105
+comprimento_minimo = 10
+comprimento_maximo = 20
+cores_aceitas = ["azul", "verde"]
+
+# Controle do menu
+opcao = ""
+
+def avaliar_qualidade(peso, cor, comprimento):
+    global reprovadas_por_peso, reprovadas_por_cor, reprovadas_por_comprimento
+
+    if not (peso_minimo <= peso <= peso_maximo):
+        reprovadas_por_peso += 1
+        return False, "Peso fora do limite permitido (deve ser 95g a 105g)"
+
+    if cor.lower() not in cores_aceitas:
+        reprovadas_por_cor += 1
+        return False, f"Cor não aceita (deve ser azul ou verde)"
+
+    if not (comprimento_minimo <= comprimento <= comprimento_maximo):
+        reprovadas_por_comprimento += 1
+        return False, f"Comprimento fora do limite permitido (deve ser 10cm a 20cm)"
+
+    return True, "Aprovada"
+
+def cadastrar_peça():
+    global total_aprovadas, total_reprovadas, caixa_atual, caixas_fechadas, peças_produzidas
+
+    print("\n 👉 Cadastro de nova peça 👈")
+    print("\n")
+    try:
+        id_peca = input("Digite o ID da peça: ")
+        peso = float(input("Digite o peso da peça em gramas:"))
+        cor = input("Digite a cor da peça: ").strip().lower()
+        comprimento = float(input("Digite o comprimento da peça em cm: "))
+    
+    except ValueError:
+        print("Entrada inválida. Peso e comprimento devem ser números.")
+        return # Sai da função se a entrada for inválida
+        
+# Avaliação e Criação do Dicionário
+    aprovada, motivo = avaliar_qualidade(peso, cor, comprimento)
+    status = "Aprovada" if aprovada else f"Reprovada ({motivo})"
+    
+    peça = {"id": id_peca, "peso": peso, "cor": cor, "comprimento": comprimento, "status": status, "motivo": motivo}
+    peças_produzidas.append(peça)
+
+    print("\n" + "*"*40)
+    print(f"👉 Peça {id_peca} - Status: {status} 👈")
+    print("\n" + "*"*40)
+
+# Lógica de Aprovação e Caixas
+    if aprovada:
+        global total_aprovadas # Garante que a atribuição é global (boa prática)
+        total_aprovadas += 1
+        caixa_atual.append(peça)
+
+        # Limitar a caixa quando chegar a 10 peças:
+        if len(caixa_atual) >= 10:
+            caixas_fechadas.append(caixa_atual)
+            caixa_atual = []
+            print("CAPACIDADE MÁXIMA ATINGIDA. Vamos começar uma nova caixa.")
+        else:
+            print(f"✅ Peça adicionada à caixa atual. Ainda restam: {10 - len(caixa_atual)}/10 para atingir o limite")
+            print("\n" + "*"*40)
+            
+# Lógica de Reprovação
+    else:
+        global total_reprovadas # Garante que a atribuição é global (boa prática)
+        total_reprovadas += 1
+
+def remover_peça():
+    global peças_produzidas
+    print("👉 Remoção de Peça 👈")
+    id_para_remover = input("Digite o ID da peça que deseja remover:").strip()
+    
+    nova_lista_peças = []
+    removida = False
+
+    for peça in peças_produzidas:
+        if peça["id"] == id_para_remover:
+            removida = True
+            print(f"✅ Peça com ID {id_para_remover} e status '{peça['status']}' removida com sucesso")
+    else:
+        nova_lista_peças.append(peça)
+
+        peças_produzidas = nova_lista_peças
+
+    if not removida:
+        print(f"❌ ERRO: Nenhuma peça encontrada com o ID {id_para_remover}.")
+
+def gerar_relatorio_final():
+    global opcao, total_aprovadas, total_reprovadas
+    print("\n" + "*"*40)
+    print("👉 Relatório consolidado 👈")
+    print("\n" + "*"*40)
+    opcao = "0"
+
+# Controle total das peças (produzidas, aprovadas e reprovadas)
+   
+    total_geral = total_aprovadas + total_reprovadas
+    print(f"Total de peças produzidas: {total_geral}")
+    print(f"Total de peças aprovadas: {total_aprovadas}")
+    print(f"Total de peças reprovadas: {total_reprovadas}")
+
+# Motivo da reprovação
+    print("\n❌ Motivos de reprovação")
+    print(f" - Por peso: {reprovadas_por_peso}")
+    print(f" - Por cor: {reprovadas_por_cor}")
+    print(f" - Por comprimento: {reprovadas_por_comprimento}")
+
+# Controle das caixas
+caixas_em_uso = len(caixas_fechadas)
+if caixa_atual:
+    caixas_em_uso += 1
+    print(f"Caixa atual (em andamento): {len(caixa_atual)}/10")
+
+    print(f"Quantidade de caixas utilizadas (fechadas e em uso): {caixas_em_uso}")
+    print("----------------------------")
+
+# MENU DO PROGRAMA
+
+while opcao != "0":
+
+    print ("Menu de opções:")
+    print ("1 - Cadastrar peça nova")
+    print ("2 - Lista de peças aprovadas/reprovadas")
+    print ("3 - Remover peça cadastrada")
+    print ("4 - Listar caixas fechadas")
+    print ("5 - Gerar relatório final")
+
+    opcao = input ("Digite a opção desejada: ")
+
+    if opcao == "1":
+       cadastrar_peça()
+
+    elif opcao == "2":
+        print("\n" + "*"*40)
+        print("👉 Lista de Peças (Aprovadas e Reprovadas) 👈")
+        print("\n" + "*"*40)
+
+        for peça in peças_produzidas:
+            print(f"ID: {peça['id']} | Status: {peça['status']}")
+
+    elif opcao == "3":
+        remover_peça()
+
+    elif opcao == "4":
+        print("*"*40)
+        print(f"👉 Caixas Fechadas ({len(caixas_fechadas)} total) 👈")
+        print("*"*40)
+        for i, caixa in enumerate(caixas_fechadas):
+            print(f"Caixa {i+1}: {len(caixa)} peças")
+        if caixa_atual:
+            print(f"Caixa atual: {len(caixa_atual)} peças (em andamento)")
+    
+    elif opcao == "5":
+        gerar_relatorio_final()
+
+    else:
+        print ("-------------")
+        print ("Opção inválida, tente novamente...")
+        print ("-------------")
+
+print("\n 👉 Sistema Encerrado 👈")
